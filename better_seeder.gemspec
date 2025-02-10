@@ -40,8 +40,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency "ruby-progressbar", "~> 1.11"   # For displaying a progress bar during data generation
 
   # ActiveSupport and ActiveRecord are assumed to be available in a Rails environment.
-  spec.add_runtime_dependency "activesupport", "~> 4.2"
-  spec.add_runtime_dependency "activerecord", "~> 4.2"
+  spec.add_runtime_dependency "activesupport", ">= 4.2"
+  spec.add_runtime_dependency "activerecord", ">= 4.2"
 
   # Development dependencies
   spec.add_development_dependency "bundler", "~> 2.0"

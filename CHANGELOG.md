@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.1] - 2025-02-10
+
+### Fixed
+- Updated ActiveSupport and ActiveRecord dependency constraints from "~> 4.2" to ">= 4.2" to ensure compatibility with newer Rails versions.
+
 ## [0.1.0] - 2025-02-10
 
 ### Added
