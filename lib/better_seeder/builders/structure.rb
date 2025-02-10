@@ -2,7 +2,7 @@
 require 'fileutils'
 
 module BetterSeeder
-  module Generators
+  module Builders
     class Structure
       TEMPLATE = <<~RUBY
         module %{module_name}

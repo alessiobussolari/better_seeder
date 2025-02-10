@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.2] - 2025-02-10
+
+### Changed
+- Renamed the `generators` directory to `builders` to avoid naming clashes.
+- Updated all related references and commands to use the new `builders` namespace.
+
 ## [0.2.1] - 2025-02-10
 
 ### Fixed

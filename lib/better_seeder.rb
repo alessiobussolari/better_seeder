@@ -6,6 +6,7 @@ require_relative "better_seeder/exporters/base"
 require_relative "better_seeder/exporters/json"
 require_relative "better_seeder/exporters/csv"
 require_relative "better_seeder/exporters/sql"
+require_relative "better_seeder/builders/structure"
 
 module BetterSeeder
   class Configuration
@@ -110,7 +111,7 @@ module BetterSeeder
   end
 
   def self.generate_structure(model_name: )
-    BetterSeeder::Generators::Structure.generate(model_name)
+    BetterSeeder::Builders::Structure.generate(model_name)
   end
 
   private
