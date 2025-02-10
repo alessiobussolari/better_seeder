@@ -5,20 +5,18 @@ require_relative "lib/better_seeder/version"
 Gem::Specification.new do |spec|
   spec.name = "better_seeder"
   spec.version = BetterSeeder::VERSION
-  spec.authors = ["alessiobussolari"]
-  spec.email = ["alessio@cosmic.tech"]
+  spec.authors = ["alessio_bussolari"]
+  spec.email = ["alessio.bussolari@pandev.it"]
 
-  spec.summary = "TODO: Write a short summary, because RubyGems requires one."
-  spec.description = "TODO: Write a longer description or delete this line."
-  spec.homepage = "TODO: Put your gem's website or public repo URL here."
-  spec.license = "MIT"
+  spec.summary       = "BetterSeeder: Simplify and optimize seeding."
+  spec.description   = "A Rails gem that provides simple methods to optimize and maintain seed data, making seeding more efficient and your code more maintainable and performant."
+  spec.homepage      = "https://github.com/your_username/rails_seed_helper"
+  spec.license       = "MIT"
   spec.required_ruby_version = ">= 3.0.0"
 
-  spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
-
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "TODO: Put your gem's public repo URL here."
-  spec.metadata["changelog_uri"] = "TODO: Put your gem's CHANGELOG.md URL here."
+  #spec.metadata["source_code_uri"] = "TODO: Put your gem's public repo URL here."
+  #spec.metadata["changelog_uri"] = "TODO: Put your gem's CHANGELOG.md URL here."
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
@@ -31,11 +29,21 @@ Gem::Specification.new do |spec|
   end
   spec.bindir = "exe"
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
+  # Specify which files to include in the gem.
+  spec.files         = Dir["lib/**/*", "README.md", "LICENSE.txt"]
   spec.require_paths = ["lib"]
 
-  # Uncomment to register a new dependency of your gem
-  # spec.add_dependency "example-gem", "~> 1.0"
+  # Runtime dependencies
+  spec.add_dependency "ffaker", "~> 2.19"             # For generating fake data
+  spec.add_dependency "dry-schema", "~> 1.5"          # For defining and validating schemas
+  spec.add_dependency "dry-types", "~> 1.5"           # For type definitions used with dry-schema
+  spec.add_dependency "ruby-progressbar", "~> 1.11"   # For displaying a progress bar during data generation
 
-  # For more information and examples about making a new gem, check out our
-  # guide at: https://bundler.io/guides/creating_gem.html
+  # ActiveSupport and ActiveRecord are assumed to be available in a Rails environment.
+  spec.add_runtime_dependency "activesupport", "~> 4.2"
+  spec.add_runtime_dependency "activerecord", "~> 4.2"
+
+  # Development dependencies
+  spec.add_development_dependency "bundler", "~> 2.0"
+  spec.add_development_dependency "rake", "~> 13.0"
 end
