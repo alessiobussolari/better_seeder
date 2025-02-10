@@ -1,6 +1,6 @@
 module BetterSeeder
-  module Generators
-    class DataGenerator
+  module Farms
+    class Farmer
       # Genera dati fittizi per il modello specificato utilizzando il file di structure.
       #
       # Opzioni attese (Hash):

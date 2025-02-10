@@ -1,7 +1,7 @@
 require_relative "better_seeder/utils"
 require_relative "better_seeder/configuration"
 require_relative "better_seeder/structure/utils"
-require_relative "better_seeder/generators/data_generator"
+require_relative "better_seeder/farms/farmer"
 require_relative "better_seeder/exporters/base"
 require_relative "better_seeder/exporters/json"
 require_relative "better_seeder/exporters/csv"
@@ -109,6 +109,10 @@ module BetterSeeder
     log_statistics(stats, total_time)
   end
 
+  def self.generate_structure(model_name: )
+    BetterSeeder::Generators::Structure.generate(model_name)
+  end
+
   private
 
   # Processa la configurazione per un singolo modello.
@@ -167,7 +171,7 @@ module BetterSeeder
 
     # Recupera o genera i record.
     records = if generate_data
-                Generators::DataGenerator.generate(model: model_name, count: count)
+                Farms::Farmer.generate(model: model_name, count: count)
               else
                 model_class.all.map(&:attributes)
               end

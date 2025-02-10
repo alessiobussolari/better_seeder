@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0] - 2025-02-10
+
+### Added
+- **Structure Generator:**  
+  Introduced the `BetterSeeder.generate_structure(model_name: 'MyModel')` method. This new functionality automatically creates a structure file template for a given model name. The generated file is saved in the appropriate subdirectory under `db/seed/structure` and includes placeholders for attribute generators, validation schema, seed configuration, and uniqueness constraints.
+
 ## [0.1.1] - 2025-02-10
 
 ### Fixed
