@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1] - 2025-02-10
+
+### Fixed
+- **Custom Generator Loading:**  
+  Fixed an issue where the custom generator `better_seeder:structure` was not found. The file structure and namespace for the generator have been updated so that Rails can correctly load it. Now you can run:
+  ```bash
+  rails generate better_seeder:structure MyNamespace::MyModel
+
 ## [0.2.0] - 2025-02-10
 
 ### Added

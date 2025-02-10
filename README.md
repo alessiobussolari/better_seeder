@@ -201,21 +201,20 @@ This command processes each model by:
 
 ## Structure Generator
 
-`BetterSeeder.generate_structure(model_name: 'MyModel')` method. This functionality automatically creates a structure file template for a given model name. The generated file is saved in the appropriate subdirectory under `db/seed/structure` and includes placeholders for attribute generators, a validation schema, seed configuration, and uniqueness constraints.
+BetterSeeder now provides a custom Rails generator to scaffold a structure file template for your models. You can generate a structure file automatically using the following command:
 
-### How to Use
-
-Simply call the method with your model name. For example:
-
-```ruby
-BetterSeeder.generate_structure(model_name: 'MyNamespace::MyModel')
+```bash
+rails generate better_seeder:structure MyNamespace::MyModel
 ```
 
-This command will generate a file at `db/seed/structure/my_namespace/my_model_structure.rb`.
+This command creates a structure file template in the appropriate subdirectory under `db/seed/structure`. The generated file includes placeholders for:
 
-### Example Generated File
+- Attribute generators (via the `structure` method)
+- Validation schema (via the `seed_schema` method)
+- Seeding configuration (via the `seed_config` method)
+- Uniqueness constraints (via the `unique_keys` method)
 
-The generated file will contain a template similar to the following:
+### Example Generated Template
 
 ```ruby
 module MyNamespace
@@ -253,6 +252,8 @@ module MyNamespace
   end
 end
 ```
+
+This generator streamlines the setup of new structure files, ensuring consistency and saving time when defining your seed data configuration.
 
 ### Benefits
 
