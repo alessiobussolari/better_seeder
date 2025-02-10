@@ -36,8 +36,10 @@ module BetterSeeder
         structure_class_name = "#{model_name}Structure"
         begin
           structure_class = Object.const_get(structure_class_name)
-        rescue NameError
-          raise "Structure class not found: #{structure_class_name}"
+        rescue error
+          message = "Structure class not found: #{structure_class_name}"
+          BetterSeeder::Utils.logger(message: message)
+          raise error
         end
 
         generation_rules = structure_class.structure
@@ -82,7 +84,8 @@ module BetterSeeder
           if schema
             result = schema.call(record)
             unless result.success?
-              Rails.logger.error "[ERROR] Record validation failed for #{model_name}: #{result.errors.to_h}"
+              message = "[ERROR] Record validation failed for #{model_name}: #{result.errors.to_h}"
+              BetterSeeder::Utils.logger(message: message)
               progressbar.increment
               next  # Rigenera il record se la validazione fallisce.
             end
@@ -105,7 +108,8 @@ module BetterSeeder
           progressbar.increment
         end
 
-        Rails.logger.info "[INFO] Generated #{generated_records.size} unique records for #{model_name} after #{attempts} attempts."
+        message = "[INFO] Generated #{generated_records.size} unique records for #{model_name} after #{attempts} attempts."
+        BetterSeeder::Utils.logger(message: message)
         generated_records
       end
     end

@@ -10,5 +10,13 @@ module BetterSeeder
       elements[-1] = "#{elements[-1]}_structure.rb"
       elements.join("/")
     end
+
+    def self.logger(message: nil)
+      if defined?(Rails) && Rails.respond_to?(:logger) && Rails.logger
+        Rails.logger.info message
+      else
+        puts message
+      end
+    end
   end
 end

@@ -10,12 +10,12 @@ Gem::Specification.new do |spec|
 
   spec.summary       = "BetterSeeder: Simplify and optimize seeding."
   spec.description   = "A Rails gem that provides simple methods to optimize and maintain seed data, making seeding more efficient and your code more maintainable and performant."
-  spec.homepage      = "https://github.com/your_username/rails_seed_helper"
+  spec.homepage      = "https://github.com/alessiobussolari/better_seeder"
   spec.license       = "MIT"
   spec.required_ruby_version = ">= 3.0.0"
 
   spec.metadata["homepage_uri"] = spec.homepage
-  #spec.metadata["source_code_uri"] = "TODO: Put your gem's public repo URL here."
+  spec.metadata["source_code_uri"] = "https://github.com/alessiobussolari/better_seeder"
   #spec.metadata["changelog_uri"] = "TODO: Put your gem's CHANGELOG.md URL here."
 
   # Specify which files should be added to the gem when it is released.
