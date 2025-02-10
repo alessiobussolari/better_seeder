@@ -234,7 +234,7 @@ This generator ensures a consistent structure for your seeding configuration acr
 
 ## Contact & Feature Requests
 
-For suggestions, bug reports, or to report new feature requests, please reach out via email at: **yourname@example.com**.
+For suggestions, bug reports, or to report new feature requests, please reach out via email at: **alessio.bussolari@pandev.it**.
 
 ---
 
