@@ -199,6 +199,69 @@ This command processes each model by:
 
 ---
 
+## Structure Generator
+
+`BetterSeeder.generate_structure(model_name: 'MyModel')` method. This functionality automatically creates a structure file template for a given model name. The generated file is saved in the appropriate subdirectory under `db/seed/structure` and includes placeholders for attribute generators, a validation schema, seed configuration, and uniqueness constraints.
+
+### How to Use
+
+Simply call the method with your model name. For example:
+
+```ruby
+BetterSeeder.generate_structure(model_name: 'MyNamespace::MyModel')
+```
+
+This command will generate a file at `db/seed/structure/my_namespace/my_model_structure.rb`.
+
+### Example Generated File
+
+The generated file will contain a template similar to the following:
+
+```ruby
+module MyNamespace
+  class MyModelStructure < BetterSeeder::StructureBase
+    # Defines generators for each attribute.
+    def self.structure
+      {
+        attribute_name: [:string, -> { "your value" }]
+      }
+    end
+
+    # Optional: Validate generated records using Dry-schema.
+    def self.seed_schema
+      Dry::Schema.Params do
+        required(:attribute_name).filled(:string)
+      end
+    end
+
+    # Specific seeding configuration for MyModel.
+    def self.seed_config
+      {
+        file_name: 'my_model_seed',
+        columns: { excluded: [] },
+        generate_data: true,
+        count: 10,
+        load_data: true,
+        parent: nil
+      }
+    end
+
+    # Optional: Uniqueness constraints.
+    def self.unique_keys
+      []
+    end
+  end
+end
+```
+
+### Benefits
+
+- **Automated Scaffolding:** Quickly generate a complete structure file template for any model.
+- **Consistency:** All generated files adhere to a standard format, ensuring consistency across your seeding logic.
+- **Customization:** Easily modify the generated file to fine-tune attribute generators, validation rules, seeding configuration, and uniqueness constraints.
+
+---
+
 ## Conclusion
 
 BetterSeeder provides a modular, configurable, and extensible system for seeding your Rails application's data:
