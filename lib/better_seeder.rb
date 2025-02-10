@@ -1,3 +1,11 @@
+require_relative "better_seeder/configuration"
+require_relative "better_seeder/structure/utils"
+require_relative "better_seeder/generators/data_generator"
+require_relative "better_seeder/exporters/base"
+require_relative "better_seeder/exporters/json"
+require_relative "better_seeder/exporters/csv"
+require_relative "better_seeder/exporters/sql"
+
 module BetterSeeder
   class Configuration
     attr_accessor :log_language, :structure_path, :preload_path

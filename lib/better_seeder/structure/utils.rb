@@ -1,3 +1,5 @@
+require 'dry-types'
+
 module BetterSeeder
   # Superclasse per tutte le structures.
   # Fornisce il modulo Types da utilizzare per la definizione dei tipi.
