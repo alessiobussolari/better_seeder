@@ -2,15 +2,17 @@
 
 module BetterSeeder
   class Configuration
-    attr_accessor :log_language, :structure_path, :preload_path
+    attr_accessor :log_language, :log_level, :structure_path, :preload_path
 
     def initialize
       if defined?(Rails) && Rails.respond_to?(:root)
         @log_language   = :en
+        @log_level   = :info
         @structure_path = Rails.root.join('db', 'seed', 'structure')
         @preload_path   = Rails.root.join('db', 'seed', 'preload')
       else
         @log_language   = :en
+        @log_level   = :info
         @structure_path = File.join(Dir.pwd, 'db', 'seed', 'structure')
         @preload_path   = File.join(Dir.pwd, 'db', 'seed', 'preload')
       end

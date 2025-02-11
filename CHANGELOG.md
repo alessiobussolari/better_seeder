@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.3] - 2025-02-11
+
+### Changed
+- Optimized the entire system for improved performance and a more modular seeding process.
+- Refactored `Farmer` class methods for better readability and modularity.
+- Introduced the `log_level` configuration for more precise logging control.
+- Improved parent key injection with a new configuration structure (e.g., `parents: [{ model: ::Media::Media, column: :media_id }, { model: ::Creators::Creator, column: :creator_id }]`).
+- Enhanced the schema validation process.
+- Added SQL-based data loading (triggered when `load_data` is true) to load existing seed data from a SQL file, preventing unnecessary record creation.
+- Enhanced export functionality in the seeding workflow to support additional formats.
+
 ## [0.2.2] - 2025-02-10
 
 ### Changed
