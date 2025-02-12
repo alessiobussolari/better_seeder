@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/better_seeder/generators/structure_generator.rb
 require 'fileutils'
 
@@ -61,7 +63,7 @@ module BetterSeeder
         full_path   = File.join(folder_path, file_name)
 
         # Ensure the target directory exists.
-        FileUtils.mkdir_p(folder_path) unless Dir.exist?(folder_path)
+        FileUtils.mkdir_p(folder_path)
 
         # Prepare the file content.
         content = format(TEMPLATE, module_name: module_name, class_name: class_name,

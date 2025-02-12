@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/generators/better_seeder/structure_generator.rb
 require 'rails/generators'
 

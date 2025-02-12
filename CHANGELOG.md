@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.3.1] - 2023-10-12
+
+### Fixed
+- Minor fixes.
+
+### Added
+- Added Rubocop integration.
+
 ## [0.2.3] - 2025-02-11
 
 ### Changed

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/better_seeder/exporter/csv_exporter_spec.rb
 require 'spec_helper'
 require 'csv'

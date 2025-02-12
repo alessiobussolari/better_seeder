@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module BetterSeeder
   module Exporters
     class Sql < Base

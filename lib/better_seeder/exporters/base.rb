@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/better_seeder/exporter/base_exporter.rb
 
 module BetterSeeder
@@ -39,7 +41,7 @@ module BetterSeeder
 
       # Verifica che la directory di output esista; se non esiste, la crea.
       def ensure_output_directory
-        FileUtils.mkdir_p(output_directory) unless Dir.exist?(output_directory)
+        FileUtils.mkdir_p(output_directory)
       end
 
       # Costruisce il percorso completo del file di output, combinando la directory, l'output_path e l'estensione.

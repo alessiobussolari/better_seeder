@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/better_seeder/configuration.rb
 
 module BetterSeeder
@@ -5,14 +7,12 @@ module BetterSeeder
     attr_accessor :log_language, :log_level, :structure_path, :preload_path
 
     def initialize
+      @log_language   = :en
+      @log_level      = :info
       if defined?(Rails) && Rails.respond_to?(:root)
-        @log_language   = :en
-        @log_level      = :info
         @structure_path = Rails.root.join('db', 'seed', 'structure')
         @preload_path   = Rails.root.join('db', 'seed', 'preload')
       else
-        @log_language   = :en
-        @log_level      = :info
         @structure_path = File.join(Dir.pwd, 'db', 'seed', 'structure')
         @preload_path   = File.join(Dir.pwd, 'db', 'seed', 'preload')
       end

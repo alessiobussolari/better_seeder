@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module BetterSeeder
   module Farms
     class Farmer
@@ -90,7 +92,7 @@ module BetterSeeder
         def inject_parent_keys(_model_name, record, structure_class)
           config       = structure_class.respond_to?(:seed_config) ? structure_class.seed_config : {}
           parents_spec = config[:parents]
-          return record unless parents_spec.present?
+          return record if parents_spec.blank?
 
           parents_spec.each do |parent_config|
             parent_model = parent_config[:model]
@@ -99,14 +101,12 @@ module BetterSeeder
             # Tenta di ottenere un record del parent dal pool BetterSeeder.generated_records se disponibile.
             # Usiamo il nome del modello come chiave nel pool.
             pool_key      = parent_model.to_s
-            parent_record = if defined?(BetterSeeder.generated_records) &&
-                               BetterSeeder.generated_records[pool_key] &&
-                               !BetterSeeder.generated_records[pool_key].empty?
-                              BetterSeeder.generated_records[pool_key].sample
-                            else
-                              BetterSeeder.generated_records[pool_key] = parent_model.all
-                              BetterSeeder.generated_records[pool_key].sample
-                            end
+            unless defined?(BetterSeeder.generated_records) &&
+                   BetterSeeder.generated_records[pool_key] &&
+                   !BetterSeeder.generated_records[pool_key].empty?
+              BetterSeeder.generated_records[pool_key] = parent_model.all
+            end
+            parent_record = BetterSeeder.generated_records[pool_key].sample
 
             raise "Parent record not found for #{parent_model}" unless parent_record
 

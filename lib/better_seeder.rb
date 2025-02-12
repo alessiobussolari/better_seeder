@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'better_seeder/utils'
 require_relative 'better_seeder/configuration'
 require_relative 'better_seeder/structure/utils'
@@ -13,14 +15,12 @@ module BetterSeeder
     attr_accessor :log_language, :structure_path, :preload_path
 
     def initialize
+      @log_language   = :en
+      @log_level      = :info
       if defined?(Rails) && Rails.respond_to?(:root)
-        @log_language   = :en
-        @log_level      = :info
         @structure_path = Rails.root.join('db', 'seed', 'structure')
         @preload_path   = Rails.root.join('db', 'seed', 'preload')
       else
-        @log_language   = :en
-        @log_level      = :info
         @structure_path = File.join(Dir.pwd, 'db', 'seed', 'structure')
         @preload_path   = File.join(Dir.pwd, 'db', 'seed', 'preload')
       end
@@ -116,7 +116,7 @@ module BetterSeeder
     message = "[LOGGER] previous log level: #{previous_log_level}, actual log level: #{ActiveRecord::Base.logger.level}"
     BetterSeeder::Utils.logger(message: message)
 
-    start_time            = Time.now
+    start_time            = Time.zone.now
     stats                 = {} # Statistiche: modello => numero di record caricati
     parent_loaded_records = {} # Per memorizzare i record creati per i modelli parent
 
@@ -129,7 +129,7 @@ module BetterSeeder
     end
 
     ActiveRecord::Base.logger.level = previous_log_level
-    total_time                      = Time.now - start_time
+    total_time                      = Time.zone.now - start_time
     log_statistics(stats, total_time)
   end
 
@@ -203,7 +203,7 @@ module BetterSeeder
     # Se abilitato, carica i record nel database.
     if load_data && File.exist?("#{BetterSeeder.configuration.preload_path}/#{seed_config[:file_name]}.sql")
       load_data_from_file(seed_config)
-      stats[model_name] = model_class.all.count
+      stats[model_name] = model_class.count
     elsif generate_data
       records                           = Farms::Farmer.generate(model: model_name, count: count)
       total_records                     = records.size

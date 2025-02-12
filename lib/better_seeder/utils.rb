@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/better_seeder/utils.rb
 #
 # = BetterSeeder::Utils

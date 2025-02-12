@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/better_seeder_spec.rb
 
 require 'spec_helper'
@@ -11,24 +13,24 @@ require 'better_seeder/structure/utils'
 RSpec.describe BetterSeeder do
   before do
     # Reset configuration between tests
-    BetterSeeder.instance_variable_set(:@configuration, nil)
+    described_class.instance_variable_set(:@configuration, nil)
   end
 
   describe '.configuration' do
     it 'returns default configuration values' do
-      config = BetterSeeder.configuration
+      config = described_class.configuration
       expect(config.log_language).to eq(:en)
       expect(config.structure_path.to_s).to include('db/seed/structure')
       expect(config.preload_path.to_s).to include('db/seed/preload')
     end
 
     it 'allows overriding configuration via BetterSeeder.configure' do
-      BetterSeeder.configure do |config|
+      described_class.configure do |config|
         config.log_language   = :it
         config.structure_path = '/tmp/structure'
         config.preload_path   = '/tmp/preload'
       end
-      config = BetterSeeder.configuration
+      config = described_class.configuration
       expect(config.log_language).to eq(:it)
       expect(config.structure_path).to eq('/tmp/structure')
       expect(config.preload_path).to eq('/tmp/preload')
@@ -46,7 +48,7 @@ RSpec.describe BetterSeeder do
         initializer_path = File.join(fake_root, 'config', 'initializers', 'better_seeder.rb')
         FileUtils.rm_f(initializer_path)
         expect(File).not_to exist(initializer_path)
-        BetterSeeder.install
+        described_class.install
         expect(File).to exist(initializer_path)
         content          = File.read(initializer_path)
         expect(content).to include('BetterSeeder.configure do |config|')

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/better_seeder/data_generator_spec.rb
 __END__
 require "spec_helper"
