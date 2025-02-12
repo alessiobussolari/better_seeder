@@ -2,15 +2,14 @@
 
 module BetterSeeder
   module Utils
-
     class << self
       # Trasforma un nome di classe in snake_case.
       # Esempio: "Campaigns::Campaign" => "campaigns_campaign"
       def transform_class_name(class_name)
-        elements = class_name.split("::").map(&:underscore)
+        elements     = class_name.split('::').map(&:underscore)
         # Aggiunge "_structure.rb" all'ultimo elemento
         elements[-1] = "#{elements[-1]}_structure.rb"
-        elements.join("/")
+        elements.join('/')
       end
 
       def logger(message: nil)
@@ -31,7 +30,6 @@ module BetterSeeder
 
         ActiveRecord::Base.logger.level = level
       end
-
     end
   end
 end

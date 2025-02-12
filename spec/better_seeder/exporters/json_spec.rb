@@ -1,13 +1,13 @@
 # spec/better_seeder/exporter/json_exporter_spec.rb
-require "spec_helper"
-require "json"
-require "tmpdir"
+require 'spec_helper'
+require 'json'
+require 'tmpdir'
 
 RSpec.describe BetterSeeder::Exporters::Json do
   let(:dummy_data) do
     [
-      { id: 1, name: "Alice", email: "alice@example.com" },
-      { id: 2, name: "Bob", email: "bob@example.com" }
+      { id: 1, name: 'Alice', email: 'alice@example.com' },
+      { id: 2, name: 'Bob', email: 'bob@example.com' },
     ]
   end
 
@@ -21,8 +21,8 @@ RSpec.describe BetterSeeder::Exporters::Json do
     end
   end
 
-  it "exports data in JSON format to the correct file" do
-    exporter = described_class.new(dummy_data, output_path: "test_export", table_name: "users")
+  it 'exports data in JSON format to the correct file' do
+    exporter = described_class.new(dummy_data, output_path: 'test_export', table_name: 'users')
     exporter.export
 
     output_file = exporter.full_output_path

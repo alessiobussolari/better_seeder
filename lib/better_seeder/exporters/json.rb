@@ -7,9 +7,7 @@ module BetterSeeder
         # Imposta la directory di output
         full_path = File.join(full_output_path)
 
-        File.open(full_path, 'w') do |file|
-          file.write(JSON.pretty_generate(data))
-        end
+        File.write(full_path, JSON.pretty_generate(data))
       end
 
       def extension

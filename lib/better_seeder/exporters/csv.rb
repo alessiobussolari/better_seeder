@@ -5,6 +5,7 @@ module BetterSeeder
       # Se la cartella non esiste, viene creata automaticamente.
       def export
         return if data.empty?
+
         headers = data.first.keys
 
         # Costruisce il percorso completo del file di output

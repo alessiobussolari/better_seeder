@@ -130,7 +130,9 @@ module MyNamespace
         generate_data: true,
         count: 50,
         load_data: true,
-        parent: nil
+        parents: [
+          { model: ::MyNamespace::MyModelParent, column: :column_id }
+        ]
       }
     end
 

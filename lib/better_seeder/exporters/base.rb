@@ -23,10 +23,10 @@ module BetterSeeder
       # @param output_path [String] Nome del file (senza estensione).
       # @param table_name [String] Nome della tabella (usato in SqlExporter).
       def initialize(data, output_path:, table_name: 'my_table')
-        @data = data
+        @data        = data
         # Utilizza il preload_path definito nella configurazione BetterSeeder (impostato nell'initializer).
         @output_path = File.join(BetterSeeder.configuration.preload_path, output_path)
-        @table_name = table_name
+        @table_name  = table_name
       end
 
       # Restituisce la directory in cui salvare i file.
@@ -53,12 +53,12 @@ module BetterSeeder
       # Metodo astratto per ottenere l'estensione del file (es. ".json", ".csv", ".sql").
       # Le classi derivate devono implementarlo.
       def extension
-        raise NotImplementedError, "Subclasses must implement #extension"
+        raise NotImplementedError, 'Subclasses must implement #extension'
       end
 
       # Metodo astratto per effettuare l'export.
       def export
-        raise NotImplementedError, "Subclasses must implement the export method"
+        raise NotImplementedError, 'Subclasses must implement the export method'
       end
     end
   end

@@ -1,12 +1,12 @@
-require_relative "better_seeder/utils"
-require_relative "better_seeder/configuration"
-require_relative "better_seeder/structure/utils"
-require_relative "better_seeder/farms/farmer"
-require_relative "better_seeder/exporters/base"
-require_relative "better_seeder/exporters/json"
-require_relative "better_seeder/exporters/csv"
-require_relative "better_seeder/exporters/sql"
-require_relative "better_seeder/builders/structure"
+require_relative 'better_seeder/utils'
+require_relative 'better_seeder/configuration'
+require_relative 'better_seeder/structure/utils'
+require_relative 'better_seeder/farms/farmer'
+require_relative 'better_seeder/exporters/base'
+require_relative 'better_seeder/exporters/json'
+require_relative 'better_seeder/exporters/csv'
+require_relative 'better_seeder/exporters/sql'
+require_relative 'better_seeder/builders/structure'
 
 module BetterSeeder
   class Configuration
@@ -14,15 +14,15 @@ module BetterSeeder
 
     def initialize
       if defined?(Rails) && Rails.respond_to?(:root)
-        @log_language = :en
-        @log_level = :info
+        @log_language   = :en
+        @log_level      = :info
         @structure_path = Rails.root.join('db', 'seed', 'structure')
-        @preload_path = Rails.root.join('db', 'seed', 'preload')
+        @preload_path   = Rails.root.join('db', 'seed', 'preload')
       else
-        @log_language = :en
-        @log_level = :info
+        @log_language   = :en
+        @log_level      = :info
         @structure_path = File.join(Dir.pwd, 'db', 'seed', 'structure')
-        @preload_path = File.join(Dir.pwd, 'db', 'seed', 'preload')
+        @preload_path   = File.join(Dir.pwd, 'db', 'seed', 'preload')
       end
     end
   end
@@ -65,7 +65,7 @@ module BetterSeeder
   #   - structure_path: percorso dove sono memorizzati i file di structure (default: Rails.root/db/seed/structure)
   #   - preload_path: percorso dove verranno salvati i file esportati (default: Rails.root/db/seed/preload)
   def self.install
-    initializer_path = File.join(Rails.root, "config", "initializers", "better_seeder.rb")
+    initializer_path = Rails.root.join('config', 'initializers', 'better_seeder.rb').to_s
 
     if File.exist?(initializer_path)
       message = "BetterSeeder initializer already exists at #{initializer_path}"
@@ -116,8 +116,8 @@ module BetterSeeder
     message = "[LOGGER] previous log level: #{previous_log_level}, actual log level: #{ActiveRecord::Base.logger.level}"
     BetterSeeder::Utils.logger(message: message)
 
-    start_time = Time.now
-    stats = {} # Statistiche: modello => numero di record caricati
+    start_time            = Time.now
+    stats                 = {} # Statistiche: modello => numero di record caricati
     parent_loaded_records = {} # Per memorizzare i record creati per i modelli parent
 
     ActiveRecord::Base.transaction do
@@ -129,15 +129,13 @@ module BetterSeeder
     end
 
     ActiveRecord::Base.logger.level = previous_log_level
-    total_time = Time.now - start_time
+    total_time                      = Time.now - start_time
     log_statistics(stats, total_time)
   end
 
   def self.generate_structure(model_name:)
     BetterSeeder::Builders::Structure.generate(model_name)
   end
-
-  private
 
   # Processa la configurazione per un singolo modello.
   # Carica il file di structure corrispondente e recupera la configurazione tramite `seed_config`.
@@ -168,18 +166,18 @@ module BetterSeeder
 
     # Recupera la configurazione specifica dal file di structure tramite il metodo seed_config.
     # Se non definito, vengono usati dei valori di default.
-    seed_config = structure_class.respond_to?(:seed_config) ? structure_class.seed_config : {}
-    file_name = seed_config[:file_name] || "#{model_name.underscore}_seed"
-    excluded_columns = if export_type.to_s.downcase != 'sql'
-                         seed_config.dig(:columns, :excluded) || []
-                       else
+    seed_config      = structure_class.respond_to?(:seed_config) ? structure_class.seed_config : {}
+    file_name        = seed_config[:file_name] || "#{model_name.underscore}_seed"
+    excluded_columns = if export_type.to_s.downcase == 'sql'
                          []
+                       else
+                         seed_config.dig(:columns, :excluded) || []
                        end
-    generate_data = seed_config.fetch(:generate_data, true)
-    count = seed_config[:count] || 10
-    load_data = seed_config.fetch(:load_data, true)
-    parent = seed_config[:parent] # nil oppure valore (o array) per modelli child
-    superclass = seed_config[:superclass] # nil oppure valore (o array) per modelli child
+    generate_data    = seed_config.fetch(:generate_data, true)
+    count            = seed_config[:count] || 10
+    load_data        = seed_config.fetch(:load_data, true)
+    parent           = seed_config[:parent] # nil oppure valore (o array) per modelli child
+    superclass       = seed_config[:superclass] # nil oppure valore (o array) per modelli child
 
     # Log per indicare se il modello è parent o child.
     message = if parent.nil?
@@ -190,7 +188,11 @@ module BetterSeeder
     BetterSeeder::Utils.logger(message: message)
 
     # Recupera la classe reale del modello (ActiveRecord).
-    model_class = Object.const_get(model_name) rescue nil
+    model_class = begin
+      Object.const_get(model_name)
+    rescue StandardError
+      nil
+    end
     unless model_class
       message = "[ERROR] Model #{model_name} not found."
       BetterSeeder::Utils.logger(message: message)
@@ -199,32 +201,31 @@ module BetterSeeder
     end
 
     # Se abilitato, carica i record nel database.
-    if load_data && File.exist?("#{BetterSeeder.configuration.preload_path.to_s}/#{seed_config[:file_name]}.sql")
+    if load_data && File.exist?("#{BetterSeeder.configuration.preload_path}/#{seed_config[:file_name]}.sql")
       load_data_from_file(seed_config)
       stats[model_name] = model_class.all.count
+    elsif generate_data
+      records                           = Farms::Farmer.generate(model: model_name, count: count)
+      total_records                     = records.size
+      stats[model_name]                 = total_records
+      created_records                   = load_records_into_db(model_class, records, total_records, model_name,
+                                                               superclass)
+      # Se il modello è parent, salva i record creati per poterli utilizzare in seguito per i modelli child.
+      parent_loaded_records[model_name] = created_records if parent.nil?
     else
-      if generate_data
-        records = Farms::Farmer.generate(model: model_name, count: count)
-        total_records = records.size
-        stats[model_name] = total_records
-        created_records = load_records_into_db(model_class, records, total_records, model_name, superclass)
-        # Se il modello è parent, salva i record creati per poterli utilizzare in seguito per i modelli child.
-        parent_loaded_records[model_name] = created_records if parent.nil?
-      else
-        model_class.all.map(&:attributes)
-      end
+      model_class.all.map(&:attributes)
     end
 
     # Rimuove le colonne escluse.
-    unless BetterSeeder.generated_records[(superclass || model_name).to_s].nil?
-      processed_records = BetterSeeder.generated_records[(superclass || model_name).to_s]
-      processed_records = processed_records.map do |campaign|
-        campaign.attributes.except(*excluded_columns.map(&:to_s))
-      end
+    return if BetterSeeder.generated_records[(superclass || model_name).to_s].nil?
 
-      # Esporta i record nel formato richiesto.
-      export_records(model_class, processed_records, export_type, file_name)
+    processed_records = BetterSeeder.generated_records[(superclass || model_name).to_s]
+    processed_records = processed_records.map do |campaign|
+      campaign.attributes.except(*excluded_columns.map(&:to_s))
     end
+
+    # Esporta i record nel formato richiesto.
+    export_records(model_class, processed_records, export_type, file_name)
   end
 
   # Carica i record nel database, utilizzando una progress bar per monitorare il progresso.
@@ -233,7 +234,7 @@ module BetterSeeder
   # @return [Array<Object>] Array dei record creati (istanze ActiveRecord)
   def self.load_records_into_db(model_class, processed_records, total_records, model_name, superclass)
     progressbar = ProgressBar.create(total: total_records, format: '%a %B %p%% %t')
-    message = "[INFO] Starting to load #{total_records} records for model #{model_name}..."
+    message     = "[INFO] Starting to load #{total_records} records for model #{model_name}..."
     BetterSeeder::Utils.logger(message: message)
 
     processed_records.each do |record|
@@ -270,14 +271,14 @@ module BetterSeeder
   # Log finale con le statistiche raccolte e il tempo totale di esecuzione.
   def self.log_statistics(stats, total_time)
     stats_message = stats.map { |model, count| "#{model}: #{count} records" }.join("\n")
-    message = "[INFO] Finished processing all models in #{total_time.round(2)} seconds. Statistics: \n#{stats_message}"
+    message       = "[INFO] Finished processing all models in #{total_time.round(2)} seconds. Statistics: \n#{stats_message}"
     BetterSeeder::Utils.logger(message: message)
   end
 
   # Metodo di utilità per trasformare il nome della classe in un formato in cui le lettere
   # sono in minuscolo e separate da underscore.
   def self.transform_class_name(class_name)
-    class_name.split("::").map(&:underscore).join("_")
+    class_name.split('::').map(&:underscore).join('_')
   end
 
   def self.load_data_from_file(seed_config)
@@ -299,7 +300,7 @@ module BetterSeeder
       ActiveRecord::Base.connection.execute(sql)
       BetterSeeder::Utils.logger(message: "[INFO] Loaded seed file: #{seed_file_path}")
       true
-    rescue => e
+    rescue StandardError => e
       BetterSeeder::Utils.logger(message: "[ERROR] Failed to load seed file: #{seed_file_path} - Error: #{e.message}")
       false
     end

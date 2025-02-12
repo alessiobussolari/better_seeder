@@ -1,13 +1,13 @@
 # spec/better_seeder/exporter/csv_exporter_spec.rb
-require "spec_helper"
-require "csv"
-require "tmpdir"
+require 'spec_helper'
+require 'csv'
+require 'tmpdir'
 
 RSpec.describe BetterSeeder::Exporters::Csv do
   let(:dummy_data) do
     [
-      { id: 1, name: "Alice", email: "alice@example.com" },
-      { id: 2, name: "Bob", email: "bob@example.com" }
+      { id: 1, name: 'Alice', email: 'alice@example.com' },
+      { id: 2, name: 'Bob', email: 'bob@example.com' },
     ]
   end
 
@@ -20,8 +20,8 @@ RSpec.describe BetterSeeder::Exporters::Csv do
     end
   end
 
-  it "exports data in CSV format to the correct file" do
-    exporter = described_class.new(dummy_data, output_path: "test_export", table_name: "users")
+  it 'exports data in CSV format to the correct file' do
+    exporter = described_class.new(dummy_data, output_path: 'test_export', table_name: 'users')
     exporter.export
 
     output_file = exporter.full_output_path
@@ -34,7 +34,7 @@ RSpec.describe BetterSeeder::Exporters::Csv do
     expect(csv_content.size).to eq(dummy_data.size)
 
     # Convert CSV rows to an array of hashes for comparison.
-    csv_data = csv_content.map(&:to_h)
+    csv_data      = csv_content.map(&:to_h)
     expected_data = dummy_data.map { |h| h.transform_values(&:to_s) }
     expected_data = expected_data.map { |h| h.transform_keys(&:to_s) }
     expect(csv_data).to eq(expected_data)

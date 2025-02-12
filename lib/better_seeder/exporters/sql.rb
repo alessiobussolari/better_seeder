@@ -11,6 +11,7 @@ module BetterSeeder
       #   ... ;
       def export
         return if data.empty?
+
         columns = data.first.keys
 
         # Crea l'array delle tuple di valori per ciascun record.
@@ -18,7 +19,7 @@ module BetterSeeder
           row_values = columns.map do |col|
             value = row[col]
             # Se il valore è nil restituisce NULL, altrimenti esegue l'escaping delle virgolette singole.
-            value.nil? ? "NULL" : "'#{value.to_s.gsub("'", "''")}'"
+            value.nil? ? 'NULL' : "'#{value.to_s.gsub("'", "''")}'"
           end
           "(#{row_values.join(', ')})"
         end
