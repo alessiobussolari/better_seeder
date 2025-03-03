@@ -1,3 +1,4 @@
+![BetterSeeder Logo](logo.png)
 # BetterSeeder
 
 BetterSeeder is a Rails gem designed to simplify and centralize your application's seeding process. It offers a flexible system to generate dynamic data, validate it using Dry-schema, enforce uniqueness constraints, load data into the database, and export it in various formats (SQL, CSV, JSON). The configuration is managed through a Rails initializer, while model-specific logic is defined in dedicated structure files.
