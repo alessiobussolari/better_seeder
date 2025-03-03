@@ -6,7 +6,6 @@ module BetterSeeder
       class << self
         def generate(options = {})
           model_name = options[:model] or raise ArgumentError, 'Missing :model option'
-          count      = options[:count] || 10
 
           # Costruisce il percorso del file di structure.
           structure_file = File.expand_path(
@@ -15,7 +14,6 @@ module BetterSeeder
           )
           raise "Structure file not found: #{structure_file}" unless File.exist?(structure_file)
 
-          # Carica il file di structure.
           load structure_file
 
           # Costruisce il nome della classe di structure: es. "Media::Participant" => "Media::ParticipantStructure"
@@ -28,65 +26,109 @@ module BetterSeeder
             raise error
           end
 
-          generated_records = []
+          seed_config = structure_class.respond_to?(:seed_config) ? structure_class.seed_config : {}
 
-          while generated_records.size < count
-            new_record = nil
-            loop do
-              new_record = build_record(model_name, structure_class)
-              new_record = inject_parent_keys(model_name, new_record, structure_class)
-              break if validate_record(new_record, structure_class) &&
-                       !record_exists?(model_name, new_record, structure_class, generated_records)
+          generated_records = []
+          if seed_config.key?(:childs)
+            # Logica per il modello child: il numero totale di record = count * childs_count
+            parent_count = seed_config[:count] || 10
+            childs_count = seed_config.dig(:childs, :count) || 10
+
+            parent_count.times do |_i|
+              childs_count.times do |child_index|
+                new_record = nil
+                loop do
+                  # Passo l'indice del record figlio per far variare gli attributi definiti in childs[:attributes]
+                  new_record = build_record(model_name, structure_class, child_index, child_mode: true)
+                  new_record = inject_parent_keys(model_name, new_record, structure_class)
+                  break if validate_record(new_record, structure_class) &&
+                    !record_exists?(model_name, new_record, structure_class, generated_records)
+                end
+                generated_records.push(new_record)
+              end
             end
-            generated_records.push(new_record)
+          else
+            # Logica standard per i modelli parent (o modelli senza childs)
+            count = options[:count] || (seed_config[:count] || 10)
+            count.times do |index|
+              new_record = nil
+              loop do
+                new_record = build_record(model_name, structure_class, index)
+                new_record = inject_parent_keys(model_name, new_record, structure_class)
+                break if validate_record(new_record, structure_class) &&
+                  !record_exists?(model_name, new_record, structure_class, generated_records)
+              end
+              generated_records.push(new_record)
+            end
           end
 
           generated_records
         end
 
+        # Il metodo build_record ora supporta la modalità child_mode.
+        # Se child_mode è true e nella configurazione (seed_config) è definita la chiave childs con :attributes,
+        # per ogni attributo viene usato il valore dell'array corrispondente all'indice (child_index) passato.
+        def build_record(_model_name, structure_class, index, child_mode: false)
+          generation_rules = structure_class.structure
+          raise 'Structure must be a Hash' unless generation_rules.is_a?(Hash)
+
+          seed_config = structure_class.respond_to?(:seed_config) ? structure_class.seed_config : {}
+
+          record = {}
+          generation_rules.each do |attribute, rule|
+            generator = rule[1]
+            if child_mode && seed_config.dig(:childs, :attributes, attribute).is_a?(Array)
+              values = seed_config[:childs][:attributes][attribute]
+              value  = values[index] # index viene passato dal loop interno
+            else
+              value = generator.respond_to?(:call) ? generator.call : generator
+            end
+            record[attribute] = value
+          end
+
+          record
+        end
+
+        # Restituisce il numero di record figli da generare per ciascun "record padre".
+        # Nel caso in cui nella configurazione sia presente la chiave childs, restituisce childs[:count],
+        # altrimenti default a 10.
+        def child_record_count(options = {})
+          model_name = options[:model] or raise ArgumentError, 'Missing :model option'
+
+          structure_file = File.expand_path(
+            File.join(BetterSeeder.configuration.structure_path, "#{model_name.underscore}_structure.rb"),
+            Dir.pwd
+          )
+          raise "Structure file not found: #{structure_file}" unless File.exist?(structure_file)
+
+          load structure_file
+          structure_class_name = "#{model_name}Structure"
+          structure_class = Object.const_get(structure_class_name)
+          seed_config = structure_class.respond_to?(:seed_config) ? structure_class.seed_config : {}
+          seed_config.dig(:childs, :count) || 10
+        end
+
         private
 
         def record_exists?(_model_name, record, structure_class, generated_records)
-          # Se non è definito il metodo unique_keys, non eseguiamo il controllo
           return false unless structure_class.respond_to?(:unique_keys)
 
           unique_key_sets = structure_class.unique_keys
           return false if unique_key_sets.empty?
 
-          # Determina il modello associato: si assume che il nome del modello sia
-          # dato dalla rimozione della stringa "Structure" dal nome della classe di structure.
           model_class_name = structure_class.to_s.sub(/Structure$/, '')
           model_class      = Object.const_get(model_class_name)
 
-          # Per ogni set di chiavi uniche, costruiamo le condizioni della query
           unique_key_sets.each do |key_set|
             conditions = {}
             key_set.each do |col|
               conditions[col] = record[col]
             end
-            # Se esiste un record nel database che soddisfa le condizioni, restituisce true.
-            return true if generated_records.find do |record|
-              conditions.all? { |key, value| record[key] == value }
-            end.present?
+            return true if generated_records.find { |r| conditions.all? { |key, value| r[key] == value } }
             return true if model_class.where(conditions).exists?
           end
 
           false
-        end
-
-        def build_record(_model_name, structure_class)
-          generation_rules = structure_class.structure
-          raise 'Structure must be a Hash' unless generation_rules.is_a?(Hash)
-
-          record = {}
-          generation_rules.each do |attribute, rule|
-            # Ogni rule è un array nel formato [tipo, generatore]
-            generator         = rule[1]
-            value             = generator.respond_to?(:call) ? generator.call : generator
-            record[attribute] = value
-          end
-
-          record
         end
 
         def inject_parent_keys(_model_name, record, structure_class)
@@ -97,21 +139,17 @@ module BetterSeeder
           parents_spec.each do |parent_config|
             parent_model = parent_config[:model]
             column       = parent_config[:column]
+            pool_key     = parent_model.to_s
 
-            # Tenta di ottenere un record del parent dal pool BetterSeeder.generated_records se disponibile.
-            # Usiamo il nome del modello come chiave nel pool.
-            pool_key      = parent_model.to_s
             unless defined?(BetterSeeder.generated_records) &&
-                   BetterSeeder.generated_records[pool_key] &&
-                   !BetterSeeder.generated_records[pool_key].empty?
+              BetterSeeder.generated_records[pool_key] &&
+              !BetterSeeder.generated_records[pool_key].empty?
               BetterSeeder.generated_records[pool_key] = parent_model.all
             end
-            parent_record = BetterSeeder.generated_records[pool_key].sample
 
+            parent_record = BetterSeeder.generated_records[pool_key].sample
             raise "Parent record not found for #{parent_model}" unless parent_record
 
-            # Inietta nel record la chiave esterna indicata nella configurazione.
-            # binding.pry if model_name == "Media::Participant"
             record[column] = parent_record[:id]
           end
 

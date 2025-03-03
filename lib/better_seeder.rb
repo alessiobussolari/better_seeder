@@ -11,22 +11,6 @@ require_relative 'better_seeder/exporters/sql'
 require_relative 'better_seeder/builders/structure'
 
 module BetterSeeder
-  class Configuration
-    attr_accessor :log_language, :structure_path, :preload_path
-
-    def initialize
-      @log_language   = :en
-      @log_level      = :info
-      if defined?(Rails) && Rails.respond_to?(:root)
-        @structure_path = Rails.root.join('db', 'seed', 'structure')
-        @preload_path   = Rails.root.join('db', 'seed', 'preload')
-      else
-        @structure_path = File.join(Dir.pwd, 'db', 'seed', 'structure')
-        @preload_path   = File.join(Dir.pwd, 'db', 'seed', 'preload')
-      end
-    end
-  end
-
   # Definisce un hash che fungerà da pool per memorizzare i record generati per ciascun modello.
   @generated_records = {}
 
@@ -189,14 +173,13 @@ module BetterSeeder
 
     # Recupera la classe reale del modello (ActiveRecord).
     model_class = begin
-      Object.const_get(model_name)
-    rescue StandardError
-      nil
-    end
+                    Object.const_get(model_name)
+                  rescue StandardError
+                    nil
+                  end
     unless model_class
       message = "[ERROR] Model #{model_name} not found."
       BetterSeeder::Utils.logger(message: message)
-
       raise Object.const_get(model_name)
     end
 
@@ -208,8 +191,7 @@ module BetterSeeder
       records                           = Farms::Farmer.generate(model: model_name, count: count)
       total_records                     = records.size
       stats[model_name]                 = total_records
-      created_records                   = load_records_into_db(model_class, records, total_records, model_name,
-                                                               superclass)
+      created_records                   = load_records_into_db(model_class, records, total_records, model_name, superclass)
       # Se il modello è parent, salva i record creati per poterli utilizzare in seguito per i modelli child.
       parent_loaded_records[model_name] = created_records if parent.nil?
     else
@@ -220,8 +202,8 @@ module BetterSeeder
     return if BetterSeeder.generated_records[(superclass || model_name).to_s].nil?
 
     processed_records = BetterSeeder.generated_records[(superclass || model_name).to_s]
-    processed_records = processed_records.map do |campaign|
-      campaign.attributes.except(*excluded_columns.map(&:to_s))
+    processed_records = processed_records.map do |record|
+      record.attributes.except(*excluded_columns.map(&:to_s))
     end
 
     # Esporta i record nel formato richiesto.

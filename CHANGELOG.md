@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.4] - 2025-03-03
+
+### Added
+- Added functionality in the Farmer class to generate child records per parent. With a childs configuration that defines a count and attribute arrays, the seeder creates (parent count) × (childs count) records, assigning distinct attribute values for each child.
+
 ## [0.2.3.1] - 2023-10-12
 
 ### Fixed
