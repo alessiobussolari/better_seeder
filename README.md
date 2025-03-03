@@ -24,6 +24,9 @@ BetterSeeder is a Rails gem designed to simplify and centralize your application
 - **Rails Generator**  
   A custom Rails generator scaffolds a structure file template for your models, ensuring a consistent configuration format.
 
+- **Child Record Generation**  
+  Now, BetterSeeder supports generating multiple child records per parent record. In your model’s seed configuration, you can define a `childs` section that specifies the number of child records to generate for each parent, along with attribute arrays to assign distinct values for each child. This allows for a total record count equal to *(parent count) × (childs count)*.
+
 ---
 
 ## Installation
@@ -65,7 +68,7 @@ If these values are set in the initializer, they will be used; otherwise, the ge
 
 To streamline the setup, execute the following command in your Rails console:
 
-```ruby
+```bash
 BetterSeeder.install
 ```
 
@@ -85,12 +88,15 @@ For each model, create a structure file that centralizes the logic for generatin
 
 - **`seed_config`**  
   Returns a hash with model-specific seeding settings:
-  - `file_name`: The output file name (without extension)
-  - `columns: { excluded: [...] }`: Columns to exclude from the generated data
-  - `generate_data`: Boolean flag indicating whether to generate data dynamically (if false, existing records are used)
-  - `count`: The number of records to generate (default: 10)
-  - `load_data`: Boolean flag indicating whether the generated records should be inserted into the database
-  - `parent`: For child models, specifies the parent model(s) used for injecting foreign keys
+    - `file_name`: The output file name (without extension)
+    - `columns: { excluded: [...] }`: Columns to exclude from the generated data
+    - `generate_data`: Boolean flag indicating whether to generate data dynamically (if false, existing records are used)
+    - `count`: The number of parent records to generate (default: 10)
+    - `load_data`: Boolean flag indicating whether the generated records should be inserted into the database
+    - `parent`: For child models, specifies the parent model(s) used for injecting foreign keys
+    - **`childs` (Optional):** A hash to define child record generation:
+        - `count`: The number of child records to generate for each parent.
+        - `attributes`: A hash mapping attribute names to an array of values. Each child record will receive a distinct value from the provided array.
 
 - **`unique_keys` (Optional)**  
   Returns an array of column groups (each group is an array of symbols) that must be unique. For example:
@@ -132,7 +138,13 @@ module MyNamespace
         load_data: true,
         parents: [
           { model: ::MyNamespace::MyModelParent, column: :column_id }
-        ]
+        ],
+        childs: {
+          count: 3,
+          attributes: {
+            some_attribute: ['value1', 'value2', 'value3']
+          }
+        }
       }
     end
 
@@ -159,7 +171,7 @@ When you call `BetterSeeder.magic` with a configuration that contains an array o
    Use the `structure` method to generate data dynamically (or fetch existing records) and validate them using `seed_schema` if defined. Uniqueness is enforced via `unique_keys`.
 
 4. **Handle Parent/Child Relationships**  
-   Automatically inject foreign keys into child models using records from parent models.
+   Automatically inject foreign keys into child models using records from parent models. With the new functionality, if a `childs` configuration is present, the gem generates child records for each parent record. For example, if `count` is set to 200 and `childs[:count]` is set to 2, a total of 400 records will be generated. Each child record receives distinct attribute values from the specified arrays.
 
 5. **Load and Export Data**  
    If enabled (`load_data: true`), the generated records are inserted into the database and exported in the specified format (SQL, CSV, or JSON). Export files are saved in the directory specified by `BetterSeeder.configuration.preload_path`.
@@ -257,6 +269,6 @@ BetterSeeder provides a modular, configurable, and extensible system for seeding
 
 - **Centralized Configuration:** Manage settings through a simple Rails initializer.
 - **Modular Structure Files:** Define data generation, validation, and configuration logic on a per-model basis.
-- **Seamless Data Handling:** Efficiently generate, validate, load, and export seed data while supporting complex relationships.
+- **Seamless Data Handling:** Efficiently generate, validate, load, and export seed data while supporting complex relationships—now with enhanced child record generation for a more realistic data model.
 
 For further details or to contribute, please refer to the official repository or documentation.
