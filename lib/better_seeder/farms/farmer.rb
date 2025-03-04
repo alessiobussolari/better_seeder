@@ -16,7 +16,6 @@ module BetterSeeder
 
           load structure_file
 
-          # Costruisce il nome della classe di structure: es. "Media::Participant" => "Media::ParticipantStructure"
           structure_class_name = "#{model_name}Structure"
           begin
             structure_class = Object.const_get(structure_class_name)
@@ -27,18 +26,26 @@ module BetterSeeder
           end
 
           seed_config = structure_class.respond_to?(:seed_config) ? structure_class.seed_config : {}
+          total_count = seed_config[:count] || 10
 
           generated_records = []
-          if seed_config.key?(:childs)
-            # Logica per il modello child: il numero totale di record = count * childs_count
-            parent_count = seed_config[:count] || 10
-            childs_count = seed_config.dig(:childs, :count) || 10
 
-            parent_count.times do |_i|
+          # Se il metodo preflight è definito, usalo per ottenere dati predefiniti
+          if structure_class.respond_to?(:preflight)
+            preflight_data = structure_class.preflight
+            generated_records.concat(preflight_data)
+          end
+
+          remaining_count = total_count - generated_records.size
+
+          if seed_config.key?(:childs)
+            # Modalità child: per ogni "record padre", generare childs_count record
+            childs_count = seed_config.dig(:childs, :count) || 10
+            # Calcolo: i record generati saranno i preflight + (remaining_count * childs_count)
+            remaining_count.times do |_i|
               childs_count.times do |child_index|
                 new_record = nil
                 loop do
-                  # Passo l'indice del record figlio per far variare gli attributi definiti in childs[:attributes]
                   new_record = build_record(model_name, structure_class, child_index, child_mode: true)
                   new_record = inject_parent_keys(model_name, new_record, structure_class)
                   break if validate_record(new_record, structure_class) &&
@@ -48,9 +55,8 @@ module BetterSeeder
               end
             end
           else
-            # Logica standard per i modelli parent (o modelli senza childs)
-            count = options[:count] || (seed_config[:count] || 10)
-            count.times do |index|
+            # Modalità standard: genera remaining_count record
+            remaining_count.times do |index|
               new_record = nil
               loop do
                 new_record = build_record(model_name, structure_class, index)

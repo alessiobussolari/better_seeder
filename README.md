@@ -42,6 +42,9 @@ Below are two images displaying key statistics from the seeding process:
 - **Child Record Generation**  
   Now, BetterSeeder supports generating multiple child records per parent record. In your model’s seed configuration, you can define a `childs` section that specifies the number of child records to generate for each parent, along with attribute arrays to assign distinct values for each child. This allows for a total record count equal to *(parent count) × (childs count)*.
 
+- **Preflight Data**  
+  You can now define a `preflight` method in your structure file. The records returned by this method are inserted first before generating any additional records, ensuring that specific data is loaded as part of the seeding process. The total record count (defined in `seed_config[:count]`) includes these preflight records.
+
 ---
 
 ## Installation
@@ -112,6 +115,9 @@ For each model, create a structure file that centralizes the logic for generatin
     - **`childs` (Optional):** A hash to define child record generation:
         - `count`: The number of child records to generate for each parent.
         - `attributes`: A hash mapping attribute names to an array of values. Each child record will receive a distinct value from the provided array.
+      
+- **`preflight` (Optional)**  
+  If defined, this method should return an array of records to be inserted before generating dynamic records. These preloaded records count toward the total defined by `count`.
 
 - **`unique_keys` (Optional)**  
   Returns an array of column groups (each group is an array of symbols) that must be unique. For example:
@@ -163,6 +169,10 @@ module MyNamespace
       }
     end
 
+    def self.preflight
+      [{ name: 'preloaded record', email: 'preloaded@example.com', created_at: Time.zone.now }]
+    end
+
     def self.unique_keys
       [[:email]]
     end
@@ -182,13 +192,16 @@ When you call `BetterSeeder.magic` with a configuration that contains an array o
 2. **Retrieve Seeding Configurations**  
    Invoke the model's `seed_config` method to obtain its specific settings.
 
-3. **Generate or Retrieve Records**  
+3. **Preflight Data**  
+   If a `preflight` method is defined in the structure file, its returned records will be inserted first. These records count toward the total number of records defined in `seed_config[:count]`.
+
+4. **Generate or Retrieve Records**  
    Use the `structure` method to generate data dynamically (or fetch existing records) and validate them using `seed_schema` if defined. Uniqueness is enforced via `unique_keys`.
 
-4. **Handle Parent/Child Relationships**  
+5. **Handle Parent/Child Relationships**  
    Automatically inject foreign keys into child models using records from parent models. With the new functionality, if a `childs` configuration is present, the gem generates child records for each parent record. For example, if `count` is set to 200 and `childs[:count]` is set to 2, a total of 400 records will be generated. Each child record receives distinct attribute values from the specified arrays.
 
-5. **Load and Export Data**  
+6. **Load and Export Data**  
    If enabled (`load_data: true`), the generated records are inserted into the database and exported in the specified format (SQL, CSV, or JSON). Export files are saved in the directory specified by `BetterSeeder.configuration.preload_path`.
 
 ### Example Usage

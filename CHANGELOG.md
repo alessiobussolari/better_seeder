@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.5] - 2025-03-04
+
+### Added
+- Introduced preflight functionality: If a structure file defines a `preflight` method, its returned records are inserted first, counting toward the total record count define
+
 ## [0.2.4] - 2025-03-03
 
 ### Added
