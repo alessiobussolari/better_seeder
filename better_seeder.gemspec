@@ -1,50 +1,66 @@
 # frozen_string_literal: true
 
-require_relative 'lib/better_seeder/version'
+require_relative "lib/better_seeder/version"
 
 Gem::Specification.new do |spec|
-  spec.name    = 'better_seeder'
-  spec.version = BetterSeeder::VERSION
-  spec.authors = ['alessio_bussolari']
-  spec.email   = ['alessio.bussolari@pandev.it']
+  spec.name          = "better_seeder"
+  spec.version       = BetterSeeder::VERSION
+  spec.authors       = ["Alessio Bussolari"]
+  spec.email         = ["alessio.bussolari@pandev.it"]
 
-  spec.summary               = 'BetterSeeder: Simplify and optimize seeding.'
-  spec.description           = 'A Rails gem that provides simple methods to optimize and maintain seed data, making seeding more efficient and your code more maintainable and performant.'
-  spec.homepage              = 'https://github.com/alessiobussolari/better_seeder'
-  spec.license               = 'MIT'
-  spec.required_ruby_version = '>= 3.0.0'
+  spec.summary       = "Structured, efficient database seeding for Rails applications"
+  spec.description   = <<~DESC
+    BetterSeeder is a powerful Ruby gem for structured database seeding in Rails applications.
+    
+    Key features:
+    * Structured data generation with dedicated model files
+    * Data validation using Dry::Schema
+    * Uniqueness constraints across one or multiple columns
+    * Parent/child relationship support
+    * Multiple export formats (SQL, CSV, JSON)
+    * Progress tracking with progress bar
+    * Preflight data insertion
+    
+    Perfect for generating and maintaining consistent seed data in Rails applications.
+  DESC
 
-  spec.metadata['homepage_uri']    = spec.homepage
-  spec.metadata['source_code_uri'] = 'https://github.com/alessiobussolari/better_seeder'
-  spec.metadata['changelog_uri']   = 'https://github.com/alessiobussolari/better_seeder/blob/main/CHANGELOG.md'
+  spec.homepage      = "https://github.com/alessiobussolari/better_seeder"
+  spec.license       = "MIT"
+  spec.required_ruby_version = ">= 3.0.0"
 
-  # Specify which files should be added to the gem when it is released.
-  # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
-  gemspec            = File.basename(__FILE__)
-  spec.files         = IO.popen(['git', 'ls-files', '-z'], chdir: __dir__, err: IO::NULL) do |ls|
-    ls.readlines("\x0", chomp: true).reject do |f|
-      (f == gemspec) ||
-        f.start_with?('bin/', 'test/', 'spec/', 'features/', '.git', '.github', 'appveyor', 'Gemfile')
+  # Metadata
+  spec.metadata = {
+    "allowed_push_host"     => "https://rubygems.org",
+    "rubygems_mfa_required" => "true",
+    "homepage_uri"          => spec.homepage,
+    "source_code_uri"       => spec.homepage,
+    "changelog_uri"         => "#{spec.homepage}/blob/main/CHANGELOG.md",
+    "bug_tracker_uri"       => "#{spec.homepage}/issues",
+    "documentation_uri"     => spec.homepage
+  }
+
+  # Include files
+  spec.files = Dir.chdir(__dir__) do
+    `git ls-files -z`.split("\x0").reject do |f|
+      (f == File.basename(__FILE__)) || f.match(%r{\A(?:(?:bin|test|spec|features)/|\.|appveyor|Gemfile)})
     end
   end
-  spec.bindir        = 'exe'
+  spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
-  # Specify which files to include in the gem.
-  spec.files         = Dir['lib/**/*', 'README.md', 'LICENSE.txt']
-  spec.require_paths = ['lib']
+  spec.require_paths = ["lib"]
 
   # Runtime dependencies
-  spec.add_dependency 'dry-schema', '~> 1.5'          # For defining and validating schemas
-  spec.add_dependency 'dry-types', '~> 1.5'           # For type definitions used with dry-schema
-  spec.add_dependency 'ffaker', '~> 2.19'             # For generating fake data
-  spec.add_dependency 'ruby-progressbar', '~> 1.11'   # For displaying a progress bar during data generation
-
-  # ActiveSupport and ActiveRecord are assumed to be available in a Rails environment.
-  spec.add_dependency 'activerecord', '>= 4.2'
-  spec.add_dependency 'activesupport', '>= 4.2'
+  spec.add_dependency "dry-schema", "~> 1.5"          # Schema validation
+  spec.add_dependency "dry-types", "~> 1.5"           # Type definitions for validation
+  spec.add_dependency "ffaker", "~> 2.19"             # Realistic data generation
+  spec.add_dependency "ruby-progressbar", "~> 1.11"   # Progress tracking
+  spec.add_dependency "activerecord", ">= 4.2"        # Database ORM integration
+  spec.add_dependency "activesupport", ">= 4.2"       # Rails utility methods
 
   # Development dependencies
-  spec.add_development_dependency 'bundler', '~> 2.0'
-  spec.add_development_dependency 'rake', '~> 13.0'
-  spec.metadata['rubygems_mfa_required'] = 'true'
+  spec.add_development_dependency "bundler", "~> 2.0"
+  spec.add_development_dependency "rake", "~> 13.0"
+  spec.add_development_dependency "rspec", "~> 3.12"
+  spec.add_development_dependency "rubocop", "~> 1.50"
+  spec.add_development_dependency "yard", "~> 0.9"
 end

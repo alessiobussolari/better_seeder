@@ -1,7 +1,14 @@
 ![BetterSeeder Logo](logo.png)
-# BetterSeeder
 
-BetterSeeder is a Rails gem designed to simplify and centralize your application's seeding process. It offers a flexible system to generate dynamic data, validate it using Dry-schema, enforce uniqueness constraints, load data into the database, and export it in various formats (SQL, CSV, JSON). The configuration is managed through a Rails initializer, while model-specific logic is defined in dedicated structure files.
+# BetterSeeder 🌱
+
+[![Gem Version](https://badge.fury.io/rb/better_seeder.svg)](https://badge.fury.io/rb/better_seeder)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Ruby Style Guide](https://img.shields.io/badge/code_style-rubocop-brightgreen.svg)](https://github.com/rubocop/rubocop)
+
+> 🚀 A powerful Ruby gem for structured, efficient, and maintainable database seeding in Rails applications
+
+BetterSeeder simplifies the process of generating, validating, and loading seed data in your Rails applications. It provides a structured approach to define and manage seed data, making your seeding process more maintainable and efficient.
 
 ## Statistics
 
@@ -17,42 +24,45 @@ Below are two images displaying key statistics from the seeding process:
 
 ![Reload Data Statistics](reload.png)
 
----
+✨ **Key Features**
+- 🏗️ **Structured Data Generation**: Define model-specific structure files
+- ✅ **Data Validation**: Validate generated data using Dry::Schema
+- 🔄 **Uniqueness Constraints**: Enforce uniqueness across one or multiple columns
+- 📊 **Progress Tracking**: Real-time progress bars during data generation
+- 📦 **Multiple Export Formats**: Export data as SQL, CSV, or JSON
+- 👨‍👧‍👦 **Parent/Child Relationships**: Support for complex data relationships
+- 🔍 **Preflight Data**: Define specific records to be inserted before dynamic generation
 
-## Features
+## Why BetterSeeder? 🤔
 
-- **Dynamic Data Generation**  
-  Define custom data generators for each model in dedicated structure files.
-
-- **Validation and Uniqueness**  
-  Validate generated records using Dry-schema and enforce uniqueness constraints across one or multiple columns.
-
-- **Loading & Exporting**  
-  Load generated data directly into your database—supporting parent/child relationships—and export the data as a single SQL INSERT statement, CSV, or JSON file.
-
-- **Centralized Configuration**  
-  Customize settings such as `log_language`, `structure_path`, and `preload_path` via a Rails initializer. If no initializer is provided, default settings apply.
-
-- **Initializer Installation**  
-  An install method creates the necessary initializer file in your Rails application to streamline setup.
-
-- **Rails Generator**  
-  A custom Rails generator scaffolds a structure file template for your models, ensuring a consistent configuration format.
-
-- **Child Record Generation**  
-  Now, BetterSeeder supports generating multiple child records per parent record. In your model’s seed configuration, you can define a `childs` section that specifies the number of child records to generate for each parent, along with attribute arrays to assign distinct values for each child. This allows for a total record count equal to *(parent count) × (childs count)*.
-
-- **Preflight Data**  
-  You can now define a `preflight` method in your structure file. The records returned by this method are inserted first before generating any additional records, ensuring that specific data is loaded as part of the seeding process. The total record count (defined in `seed_config[:count]`) includes these preflight records.
-
----
+- 🏗️ **Structured Approach**: Centralize your seeding logic in dedicated structure files
+- 🧩 **Modular Design**:
+  - Separate model-specific logic
+  - Reusable data generators
+  - Configurable validation rules
+- 🔄 **Flexible Data Generation**:
+  - Dynamic data generation with FFaker
+  - Support for custom generators
+  - Parent/child relationships
+- ✅ **Robust Validation**:
+  - Schema validation with Dry::Schema
+  - Uniqueness constraints
+  - Custom validation rules
+- 📊 **Visibility & Control**:
+  - Real-time progress tracking
+  - Detailed logging
+  - Configurable output formats
+- 👨‍👧‍👦 **Relationship Management**:
+  - Parent/child record generation
+  - Foreign key handling
+  - Multiple child records per parent
 
 ## Installation
 
 Add the gem to your Gemfile:
 
 ```ruby
-gem 'better_seeder'
+gem 'better_seeder', '~> 0.2.6'
 ```
 
 Then run:
@@ -61,91 +71,208 @@ Then run:
 bundle install
 ```
 
----
+Or install the gem manually:
+
+```bash
+gem install better_seeder
+```
 
 ## Configuration
 
-BetterSeeder uses a centralized configuration defined in `BetterSeeder.configuration`. You can override the default settings by creating an initializer. For example, create a file:
+In a Rails application, you can create an initializer by running:
 
 ```ruby
-# config/initializers/better_seeder.rb
-require 'better_seeder'
-
-BetterSeeder.configure do |config|
-  config.log_language   = :en
-  config.structure_path = Rails.root.join('db', 'seed', 'structure')
-  config.preload_path   = Rails.root.join('db', 'seed', 'preload')
-end
-```
-
-If these values are set in the initializer, they will be used; otherwise, the gem will use its default values.
-
----
-
-## Initializer Installation
-
-To streamline the setup, execute the following command in your Rails console:
-
-```bash
 BetterSeeder.install
 ```
 
-This command creates (if not already present) the file `config/initializers/better_seeder.rb` with the necessary configuration.
+This command creates the file `config/initializers/better_seeder.rb` with a default configuration. An example configuration is:
 
----
+```ruby
+BetterSeeder.configure do |config|
+  # Language for logs (default: :en)
+  config.log_language = :en
+
+  # Log level (default: :info)
+  config.log_level = :info
+
+  # Path to structure files (default: Rails.root.join('db', 'seed', 'structure'))
+  config.structure_path = Rails.root.join('db', 'seed', 'structure')
+
+  # Path to preloaded data (default: Rails.root.join('db', 'seed', 'preload'))
+  config.preload_path = Rails.root.join('db', 'seed', 'preload')
+end
+```
 
 ## Structure Files
 
 For each model, create a structure file that centralizes the logic for generating, validating, and configuring seed data. Each structure file should include:
 
-- **`structure`**  
-  Returns a hash where each key is an attribute and its value is an array in the format `[type, lambda_generator]`.
+### Core Components
 
-- **`seed_schema` (Optional)**  
-  Defines a Dry-schema for validating generated records.
+- **`structure`**  
+  Defines how each attribute is generated:
+  ```ruby
+  def self.structure
+    {
+      name:       [:string,   -> { FFaker::Name.name }],
+      email:      [:string,   -> { FFaker::Internet.email }],
+      created_at: [:datetime, -> { Time.zone.now }]
+    }
+  end
+  ```
+
+- **`seed_schema_validation` (Optional)**  
+  Validates generated records using Dry::Schema:
+  ```ruby
+  def self.seed_schema_validation
+    Dry::Schema.Params do
+      required(:name).filled(:string)
+      required(:email).filled(:string)
+      required(:created_at).filled(:time)
+    end
+  end
+  ```
 
 - **`seed_config`**  
-  Returns a hash with model-specific seeding settings:
-    - `file_name`: The output file name (without extension)
-    - `columns: { excluded: [...] }`: Columns to exclude from the generated data
-    - `generate_data`: Boolean flag indicating whether to generate data dynamically (if false, existing records are used)
-    - `count`: The number of parent records to generate (default: 10)
-    - `load_data`: Boolean flag indicating whether the generated records should be inserted into the database
-    - `parent`: For child models, specifies the parent model(s) used for injecting foreign keys
-    - **`childs` (Optional):** A hash to define child record generation:
-        - `count`: The number of child records to generate for each parent.
-        - `attributes`: A hash mapping attribute names to an array of values. Each child record will receive a distinct value from the provided array.
-      
-- **`preflight` (Optional)**  
-  If defined, this method should return an array of records to be inserted before generating dynamic records. These preloaded records count toward the total defined by `count`.
+  Configures the seeding process:
+  ```ruby
+  def self.seed_config
+    {
+      file_name: 'my_model_seed',
+      columns: { excluded: [:id, :updated_at] },
+      generate_data: true,
+      count: 50,
+      load_data: true,
+      parents: [
+        { model: ::MyNamespace::ParentModel, column: :parent_id }
+      ],
+      childs: {
+        count: 3,
+        attributes: {
+          some_attribute: ['value1', 'value2', 'value3']
+        }
+      }
+    }
+  end
+  ```
+
+### Additional Components
 
 - **`unique_keys` (Optional)**  
-  Returns an array of column groups (each group is an array of symbols) that must be unique. For example:
-
+  Defines uniqueness constraints:
   ```ruby
   def self.unique_keys
     [[:email], [:first_name, :last_name]]
   end
   ```
 
-### Example Structure File
+- **`preflight` (Optional)**  
+  Provides specific records to insert before dynamic generation:
+  ```ruby
+  def self.preflight
+    [{ name: 'Admin User', email: 'admin@example.com', created_at: Time.zone.now }]
+  end
+  ```
+
+- **`foreign_data` (Optional)**  
+  Provides data for foreign key relationships:
+  ```ruby
+  def self.foreign_data
+    @foreign_data ||= {
+      parents: ::Parent.all,
+      categories: ::Category.all
+    }
+  end
+  ```
+
+## Usage
+
+### Basic Usage
+
+```ruby
+BetterSeeder.magic(
+  model_names: ['MyNamespace::MyModel', 'AnotherNamespace::AnotherModel'],
+  configurations: {
+    export_type: :sql
+  }
+)
+```
+
+### Structure Generation
+
+To generate a structure file template for a model:
+
+```ruby
+BetterSeeder.generate_structure(model_name: 'MyNamespace::MyModel')
+```
+
+This creates a file at `db/seed/structure/my_namespace/my_model_structure.rb` with placeholders for all required methods.
+
+### Rails Generator
+
+Alternatively, use the Rails generator:
+
+```bash
+rails generate better_seeder:structure MyNamespace::MyModel
+```
+
+## Advanced Features
+
+### Child Record Generation
+
+BetterSeeder supports generating multiple child records for each parent record. In your model's seed configuration, define a `childs` section:
+
+```ruby
+def self.seed_config
+  {
+    # ... other configuration
+    childs: {
+      count: 3,  # Generate 3 child records per parent
+      attributes: {
+        role: ['admin', 'editor', 'viewer']  # Each child gets a different role
+      }
+    }
+  }
+end
+```
+
+This allows for a total record count equal to *(parent count) × (child count)*.
+
+### Preflight Data
+
+You can define specific records to be inserted before dynamic generation:
+
+```ruby
+def self.preflight
+  [
+    { name: 'Admin User', email: 'admin@example.com', role: 'admin' },
+    { name: 'System User', email: 'system@example.com', role: 'system' }
+  ]
+end
+```
+
+These preflight records count toward the total defined in `seed_config[:count]`.
+
+## Example Structure File
 
 ```ruby
 # db/seed/structure/my_namespace/my_model_structure.rb
 module MyNamespace
-  class MyModelStructure < BetterSeeder::StructureBase
+  class MyModelStructure < ::BetterSeeder::Structure::Utils
     def self.structure
       {
         name:       [:string,   -> { FFaker::Name.name }],
         email:      [:string,   -> { FFaker::Internet.email }],
+        role:       [:enum,     -> { %w[admin editor viewer].sample }],
         created_at: [:datetime, -> { Time.zone.now }]
       }
     end
 
-    def self.seed_schema
+    def self.seed_schema_validation
       Dry::Schema.Params do
         required(:name).filled(:string)
         required(:email).filled(:string)
+        required(:role).filled(:string)
         required(:created_at).filled(:time)
       end
     end
@@ -158,19 +285,19 @@ module MyNamespace
         count: 50,
         load_data: true,
         parents: [
-          { model: ::MyNamespace::MyModelParent, column: :column_id }
+          { model: ::MyNamespace::ParentModel, column: :parent_id }
         ],
         childs: {
           count: 3,
           attributes: {
-            some_attribute: ['value1', 'value2', 'value3']
+            role: ['admin', 'editor', 'viewer']
           }
         }
       }
     end
 
     def self.preflight
-      [{ name: 'preloaded record', email: 'preloaded@example.com', created_at: Time.zone.now }]
+      [{ name: 'Admin User', email: 'admin@example.com', role: 'admin', created_at: Time.zone.now }]
     end
 
     def self.unique_keys
@@ -180,123 +307,51 @@ module MyNamespace
 end
 ```
 
----
-
 ## How It Works
 
-When you call `BetterSeeder.magic` with a configuration that contains an array of model names (as strings), the gem will:
+When you call `BetterSeeder.magic` with a configuration that contains an array of model names, the gem will:
 
 1. **Load Structure Files**  
-   Retrieve the corresponding structure file from the directory defined by `BetterSeeder.configuration.structure_path` for each model.
+   Retrieve the corresponding structure file for each model.
 
-2. **Retrieve Seeding Configurations**  
-   Invoke the model's `seed_config` method to obtain its specific settings.
+2. **Process Preflight Data**  
+   If a `preflight` method is defined, its returned records will be inserted first.
 
-3. **Preflight Data**  
-   If a `preflight` method is defined in the structure file, its returned records will be inserted first. These records count toward the total number of records defined in `seed_config[:count]`.
+3. **Generate Dynamic Data**  
+   Use the `structure` method to generate data dynamically.
 
-4. **Generate or Retrieve Records**  
-   Use the `structure` method to generate data dynamically (or fetch existing records) and validate them using `seed_schema` if defined. Uniqueness is enforced via `unique_keys`.
+4. **Validate Generated Data**  
+   Validate records using `seed_schema_validation` if defined.
 
-5. **Handle Parent/Child Relationships**  
-   Automatically inject foreign keys into child models using records from parent models. With the new functionality, if a `childs` configuration is present, the gem generates child records for each parent record. For example, if `count` is set to 200 and `childs[:count]` is set to 2, a total of 400 records will be generated. Each child record receives distinct attribute values from the specified arrays.
+5. **Enforce Uniqueness**  
+   Ensure uniqueness based on `unique_keys`.
 
-6. **Load and Export Data**  
-   If enabled (`load_data: true`), the generated records are inserted into the database and exported in the specified format (SQL, CSV, or JSON). Export files are saved in the directory specified by `BetterSeeder.configuration.preload_path`.
+6. **Handle Relationships**  
+   Process parent/child relationships and foreign keys.
 
-### Example Usage
+7. **Load Data**  
+   Insert records into the database if `load_data` is true.
 
-```ruby
-BetterSeeder.magic(
-  {
-    configurations: { export_type: :sql },
-    data: [
-      'MyNamespace::MyModel',
-      'OtherNamespace::OtherModel'
-    ]
-  }
-)
-```
+8. **Export Data**  
+   Export data in the specified format (SQL, CSV, or JSON).
 
----
+## Contributing 🤝
 
-## Rails Generator
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-A custom Rails generator is available to scaffold a structure file template for your models. Execute the following command:
+## Contact & Support 📬
 
-```bash
-rails generate better_seeder:structure MyNamespace::MyModel
-```
+- **Email**: alessio.bussolari@pandev.it
+- **Issues**: [GitHub Issues](https://github.com/alessiobussolari/better_seeder/issues)
 
-This command creates a structure file template in the appropriate subdirectory under `db/seed/structure`. The generated template includes placeholders for:
+## License 📄
 
-- Attribute generators (via the `structure` method)
-- Validation schema (via the `seed_schema` method)
-- Seeding configuration (via the `seed_config` method)
-- Uniqueness constraints (via the `unique_keys` method)
+This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.txt) file for details.
 
-### Example Generated Template
+BetterSeeder aims to simplify the database seeding process in Rails applications by providing a structured, configurable, and extensible system. Whether you need to generate dynamic data, validate it, or handle complex relationships, BetterSeeder streamlines the entire process. Contributions, feedback, and feature requests are highly encouraged to help improve the gem further.
 
-```ruby
-module MyNamespace
-  class MyModelStructure < BetterSeeder::StructureBase
-    def self.structure
-      {
-        attribute_name: [:string, -> { "your value" }]
-      }
-    end
-
-    def self.seed_schema
-      Dry::Schema.Params do
-        required(:attribute_name).filled(:string)
-      end
-    end
-
-    def self.seed_config
-      {
-        file_name: 'my_model_seed',
-        columns: { excluded: [] },
-        generate_data: true,
-        count: 10,
-        load_data: true,
-        parent: nil
-      }
-    end
-
-    def self.unique_keys
-      []
-    end
-  end
-end
-```
-
-This generator ensures a consistent structure for your seeding configuration across models.
-
----
-
-## Contact & Feature Requests
-
-For suggestions, bug reports, or to report new feature requests, please reach out via email at: **alessio.bussolari@pandev.it**.
-
----
-
-## Upcoming Features
-
-The development team is continuously enhancing BetterSeeder. Current efforts include:
-
-- **Additional Export Formats:** Expanding beyond SQL, CSV, and JSON to offer more options.
-- **Enhanced Rails Associations Integration:** Improving support for complex parent/child relationships.
-- **Expanded Configuration Options:** Providing more granular control over the seeding process.
-- **Performance Optimizations:** Refining data generation algorithms for faster processing.
-
----
-
-## Conclusion
-
-BetterSeeder provides a modular, configurable, and extensible system for seeding your Rails application's data. Its key benefits include:
-
-- **Centralized Configuration:** Manage settings through a simple Rails initializer.
-- **Modular Structure Files:** Define data generation, validation, and configuration logic on a per-model basis.
-- **Seamless Data Handling:** Efficiently generate, validate, load, and export seed data while supporting complex relationships—now with enhanced child record generation for a more realistic data model.
-
-For further details or to contribute, please refer to the official repository or documentation.
+For more details, please visit the [GitHub repository](https://github.com/alessiobussolari/better_seeder).
