@@ -1,5 +1,3 @@
-![BetterSeeder Logo](logo.png)
-
 # BetterSeeder 🌱
 
 [![Gem Version](https://badge.fury.io/rb/better_seeder.svg)](https://badge.fury.io/rb/better_seeder)
